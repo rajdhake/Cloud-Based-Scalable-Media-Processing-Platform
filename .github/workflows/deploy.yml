@@ -1,0 +1,95 @@
+name: Build and Deploy to GKE
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - python/**
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: ${{ secrets.GKE_PROJECT }}
+  GKE_CLUSTER: video-converter-gke
+  GKE_ZONE: us-east1-b
+
+jobs:
+  setup-build-publish-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GKE_SA_KEY }}
+
+      # Setup gcloud CLI
+      - name: Setup gcloud CLI
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GKE_PROJECT }}
+
+      # Configure Docker for authentication
+      - name: Configure Docker Authentication
+        run: gcloud auth configure-docker gcr.io --quiet
+
+      # Get GKE Credentials
+      - name: Get GKE Credentials
+        uses: google-github-actions/get-gke-credentials@v1
+        with:
+          cluster_name: ${{ env.GKE_CLUSTER }}
+          location: ${{ env.GKE_ZONE }}
+          project_id: ${{ secrets.GKE_PROJECT }}
+
+      # Sequentially Build, Push, and Deploy Each Service
+      # Create ConfigMap for init.sql
+      - name: Create ConfigMap for MySQL initialization
+        run: |
+          echo "Creating ConfigMap for MySQL initialization..."
+          kubectl create configmap mysql-init-script --from-file=python/src/mysql/init.sql --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Build, Push, and Deploy MySQL Service
+        run: |
+          echo "Building and deploying auth service..."
+          kubectl apply -f python/src/mysql/manifests
+          kubectl rollout status deployment/mysql
+
+      - name: Build, Push, and Deploy Auth Service
+        run: |
+          echo "Building and deploying auth service..."
+          docker build -t gcr.io/$PROJECT_ID/auth:$GITHUB_SHA python/src/auth
+          docker push gcr.io/$PROJECT_ID/auth:$GITHUB_SHA
+          kubectl apply -f python/src/auth/manifests
+          kubectl rollout status deployment/auth
+      
+      - name: Deploy RabbitMQ
+        run: |
+          echo "Deploying RabbitMQ..."
+          kubectl apply -f python/src/rabbit/manifests
+          kubectl rollout status statefulset/rabbitmq
+    
+      - name: Build, Push, and Deploy Gateway Service
+        run: |
+          echo "Building and deploying gateway service..."
+          docker build -t gcr.io/$PROJECT_ID/gateway:$GITHUB_SHA python/src/gateway
+          docker push gcr.io/$PROJECT_ID/gateway:$GITHUB_SHA
+          kubectl apply -f python/src/gateway/manifests
+          kubectl rollout status deployment/gateway
+
+      - name: Build, Push, and Deploy Converter Service
+        run: |
+          echo "Building and deploying converter service..."
+          docker build -t gcr.io/$PROJECT_ID/converter:$GITHUB_SHA python/src/converter
+          docker push gcr.io/$PROJECT_ID/converter:$GITHUB_SHA
+          kubectl apply -f python/src/converter/manifests
+          kubectl rollout status deployment/converter
+      
+      - name: Deploy MongoDB
+        run: |
+          echo "Deploying MongoDB..."
+          kubectl apply -f python/src/mongo/manifests
+          kubectl rollout status deployment/mongodb
