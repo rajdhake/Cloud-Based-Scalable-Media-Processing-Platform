@@ -1,5 +1,4 @@
-# ECCProject
-This is a Repository Created for ENGR-E 518 ECC Course Project by Shreyas, Prinston &amp; Raj
+
 
 # Project Setup
 
