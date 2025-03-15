@@ -7,13 +7,13 @@ The system encountered recurring out-of-memory (OOM) errors once the number of c
 2.	MongoDB Pod Restarts Leading to Data Loss:
 MongoDB pods were often restarting because of inadequate resource allocation and elevated I/O demands. These restarts led to the service losing track of processed MP3 files, which caused user frustration and necessitated repeated conversion tasks.
 3.	Converter Service Failures at High Load:
- 
-When under heavy load, the converter service turned into a bottleneck, struggling to handle requests effectively.
- A dynamic scheduling script was introduced, allowing the converter pod to automatically scale vertically according to resource consumption. This improvement guaranteed reliable service performance.
+When under heavy load, the converter service turned into a bottleneck, struggling to handle requests effectively. A dynamic scheduling script was introduced, allowing the converter pod to automatically scale vertically according to resource consumption. This improvement guaranteed reliable service performance.
+<img width="338" alt="image" src="https://github.com/user-attachments/assets/26b30d5d-b3c1-49a1-adf5-93e50f2b8cb2" />
  
 4.	Horizontal Scaling for MongoDB Pods:
 To manage the high input/output requirements and decrease the rate of pod restarts, horizontal scaling was implemented for MongoDB pods. This approach balanced the load across several instances, enhancing resilience and availability of the database.
-![image](https://github.com/user-attachments/assets/9859679e-2796-4086-b4cb-66612328f8d9)
+<img width="345" alt="image" src="https://github.com/user-attachments/assets/ba75001f-96c7-43f4-a3ee-86a2d9d9deab" />
+
 
 
 # Project Setup
