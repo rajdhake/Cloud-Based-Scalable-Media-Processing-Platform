@@ -4,15 +4,14 @@ The core functionality of the backend application is a Flask-based service writt
 # Primary Observations
 1.	Out-of-Memory Errors Under High User Load:
 The system encountered recurring out-of-memory (OOM) errors once the number of concurrent requests reached around 1000. This problem underscored the necessity for effective memory management in the converter service and appropriate resource distribution to manage peak traffic.
-2.	MongoDB Pod Restarts Leading to Data Loss:
-MongoDB pods were often restarting because of inadequate resource allocation and elevated I/O demands. These restarts led to the service losing track of processed MP3 files, which caused user frustration and necessitated repeated conversion tasks.
+2.	Database Pod Restarts Leading to Data Loss: pods were often restarting because of inadequate resource allocation and elevated I/O demands. These restarts led to the service losing track of processed MP3 files, which caused user frustration and necessitated repeated conversion tasks.
 3.	Converter Service Failures at High Load:
 When under heavy load, the converter service turned into a bottleneck, struggling to handle requests effectively. 
 <img width="338" alt="image" src="https://github.com/user-attachments/assets/26b30d5d-b3c1-49a1-adf5-93e50f2b8cb2" />
  
 # Solution
 1. A dynamic scheduling script was introduced, allowing the converter pod to automatically scale vertically according to resource consumption. This improvement guaranteed reliable service performance.
-2.	Horizontal Scaling for MongoDB Pods to manage the high input/output requirements and decrease the rate of pod restarts, horizontal scaling was implemented for MongoDB pods. This approach balanced the load across several instances, enhancing resilience and availability of the database.
+2.	Horizontal Scaling for Database Pods to manage the high input/output requirements and decrease the rate of pod restarts, horizontal scaling was implemented for pods. This approach balanced the load across several instances, enhancing resilience and availability of the database.
 <img width="345" alt="image" src="https://github.com/user-attachments/assets/ba75001f-96c7-43f4-a3ee-86a2d9d9deab" />
 
 
