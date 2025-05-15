@@ -1,3 +1,5 @@
+# Distributed Video-to-Audio Processing Pipeline at Scale
+
 This project revolves around developing a scalable, efficient, and fully automated video-to-audio (MP4 to MP3) conversion service. The system is designed to handle user requests for video-to-audio conversion, manage large amounts of data (videos and audio files), and ensure smooth communication between various components using message queues.
 The core functionality of the backend application is a Flask-based service written in Python. This application leverages custom-built services packaged into Docker images and deployed within a Kubernetes cluster. The primary purpose of the application is to convert MP4 videos to MP3 audio files.
 
